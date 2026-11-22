@@ -43,7 +43,7 @@ protected:
     void ProcessEvent(EVENT ev);
 
     bool IsButton(CUIWindow* st);
-    void CreateList(xr_vector<CUIStatic*>& lst, CUIXml& xml_doc, LPCSTR path);
+    void CreateList(xr_vector<CUIStatic*>& lst, CUIXml& xml_doc, LPCSTR path, Fvector2& wnd_pos);
     void ShowMain();
     void ShowNewGame();
     float pos(float x1, float x2, u32 t);
@@ -60,6 +60,10 @@ protected:
     float m_destination;
     float m_mag_pos;
     float m_offset{};
+
+    Fvector2 m_base_pos{}; // позиция shniaga_wnd из XML
+    Fvector2 m_pos_main{}; // позиция для страницы 0
+    Fvector2 m_pos_new{}; // позиция для страницы 1
 
     xr_vector<CUIStatic*> m_buttons;
     xr_vector<CUIStatic*> m_buttons_new;

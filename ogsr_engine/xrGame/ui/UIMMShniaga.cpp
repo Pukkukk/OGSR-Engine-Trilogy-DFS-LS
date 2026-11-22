@@ -69,6 +69,7 @@ void CUIMMShniaga::Init(CUIXml& xml_doc, LPCSTR path)
     string256 _path;
 
     CUIXmlInit::InitWindow(xml_doc, path, 0, this);
+    m_base_pos = GetWndPos();
     strconcat(sizeof(_path), _path, path, ":shniaga:magnifire");
     CUIXmlInit::InitStatic(xml_doc, _path, 0, m_magnifier);
     m_mag_pos = m_magnifier->GetWndPos().x;
@@ -90,19 +91,20 @@ void CUIMMShniaga::Init(CUIXml& xml_doc, LPCSTR path)
     if (!g_pGameLevel)
     {
         if (!*g_last_saved_game || !CSavedGameWrapper::valid_saved_game(g_last_saved_game))
-            CreateList(m_buttons, xml_doc, "menu_main");
+            CreateList(m_buttons, xml_doc, "menu_main", m_pos_main);
         else
-            CreateList(m_buttons, xml_doc, "menu_main_last_save");
+            CreateList(m_buttons, xml_doc, "menu_main_last_save", m_pos_main);
 
-        CreateList(m_buttons_new, xml_doc, "menu_new_game");
+        CreateList(m_buttons_new, xml_doc, "menu_new_game", m_pos_new);
     }
     else
     {
         VERIFY(Actor());
         if (Actor() && !Actor()->g_Alive())
-            CreateList(m_buttons, xml_doc, "menu_main_single_dead");
+            CreateList(m_buttons, xml_doc, "menu_main_single_dead", m_pos_main);
         else
-            CreateList(m_buttons, xml_doc, "menu_main_single");
+            CreateList(m_buttons, xml_doc, "menu_main_single", m_pos_main);
+        m_pos_new = m_base_pos;
     }
 
     ShowMain();
@@ -132,11 +134,23 @@ void CUIMMShniaga::OnDeviceReset()
 
 extern CActor* g_actor;
 
-void CUIMMShniaga::CreateList(xr_vector<CUIStatic*>& lst, CUIXml& xml_doc, LPCSTR path)
+void CUIMMShniaga::CreateList(xr_vector<CUIStatic*>& lst, CUIXml& xml_doc, LPCSTR path, Fvector2& wnd_pos)
 {
     CGameFont* pF;
     u32 color;
     float height;
+
+    // позиция страницы: по умолчанию как у shniaga_wnd, x/y в узле переопределяют её
+    wnd_pos = m_base_pos;
+    {
+        CUIWindow tmp; // чтобы x/y прошли то же масштабирование, что и у shniaga_wnd
+        CUIXmlInit::InitWindow(xml_doc, path, 0, &tmp);
+        Fvector2 p = tmp.GetWndPos();
+        if (*xml_doc.ReadAttrib(path, 0, "x", ""))
+            wnd_pos.x = p.x;
+        if (*xml_doc.ReadAttrib(path, 0, "y", ""))
+            wnd_pos.y = p.y;
+    }
 
     height = xml_doc.ReadAttribFlt(path, 0, "btn_height");
     R_ASSERT(height);
@@ -171,6 +185,7 @@ void CUIMMShniaga::CreateList(xr_vector<CUIStatic*>& lst, CUIXml& xml_doc, LPCST
 void CUIMMShniaga::ShowMain()
 {
     m_page = 0;
+    SetWndPos(m_pos_main);
     m_view->Clear();
     for (u32 i = 0; i < m_buttons.size(); i++)
         m_view->AddWindow(m_buttons[i], false);
@@ -181,6 +196,7 @@ void CUIMMShniaga::ShowMain()
 void CUIMMShniaga::ShowNewGame()
 {
     m_page = 1;
+    SetWndPos(m_pos_new);
     m_view->Clear();
     for (u32 i = 0; i < m_buttons_new.size(); i++)
         m_view->AddWindow(m_buttons_new[i], false);

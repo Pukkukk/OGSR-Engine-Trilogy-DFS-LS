@@ -25,6 +25,8 @@ public:
 
     virtual void shedule_Update(u32 dt) override;
 
+    void SetZoomedState(bool zoomed);
+
     virtual void feel_touch_new(CObject* O) override;
     virtual void feel_touch_delete(CObject* O) override;
     virtual BOOL feel_touch_contact(CObject* O) override;

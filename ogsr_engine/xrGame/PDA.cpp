@@ -16,6 +16,8 @@
 #include "player_hud.h"
 #include "ai_sounds.h"
 #include "inventory.h"
+#include "game_object_space.h"
+#include "script_game_object.h"
 
 static CUIPdaWnd* GetPdaWindow()
 {
@@ -223,7 +225,7 @@ void CPda::OnH_B_Independent(bool just_before_destroy)
 
     SwitchState(eHidden);
     SetPending(FALSE);
-    m_bZoomed = false;
+    SetZoomedState(false);
 
     CUIPdaWnd* pda = GetPdaWindow();
     // KRodin: TODO: А тут надо скрывать окно пда?
@@ -340,7 +342,7 @@ void CPda::OnStateSwitch(u32 S, u32 oldState)
             HUD_SOUND::PlaySound(sndHide, Position(), H_Root(), !!GetHUDmode(), false, false);
             PlayHUDMotion("anm_hide", true, GetState());
             SetPending(TRUE);
-            m_bZoomed = false;
+            SetZoomedState(false);
             auto pdawnd = GetPdaWindow();
             g_player_hud->reset_thumb(false);
             if (pdawnd)
@@ -353,7 +355,7 @@ void CPda::OnStateSwitch(u32 S, u32 oldState)
     case eHidden: {
         if (oldState != eHidden)
         {
-            m_bZoomed = false;
+            SetZoomedState(false);
             CUIPdaWnd* pda = GetPdaWindow();
             // KRodin: TODO: А тут надо скрывать окно пда?
             g_player_hud->reset_thumb(true);
@@ -588,6 +590,17 @@ void CPda::OnHiddenItem()
 
     auto pGameSP = smart_cast<CUIGameSP*>(HUD().GetUI()->UIGame());
     pGameSP->ShowHidePda(false);
+}
+
+void CPda::SetZoomedState(bool zoomed)
+{
+    if (m_bZoomed == zoomed)
+        return;
+
+    m_bZoomed = zoomed;
+
+    if (smart_cast<CActor*>(H_Parent()))
+        g_actor->callback(zoomed ? GameObject::eOnActorWeaponZoomIn : GameObject::eOnActorWeaponZoomOut)(lua_game_object());
 }
 
 CPda::~CPda()

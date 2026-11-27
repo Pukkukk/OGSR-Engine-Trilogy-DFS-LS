@@ -15,6 +15,9 @@
 *.user
 *.exp
 *.aps
+*.zip
+*.rar
+*.7z
 *.TMP
 
 # Windows image file caches

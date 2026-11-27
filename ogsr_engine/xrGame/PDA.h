@@ -68,7 +68,8 @@ private:
     u16 joystick{BI_NONE};
     static void JoystickCallback(CBoneInstance* B);
 
-    HUD_SOUND sndShow, sndHide, sndBtnPress, sndBtnRelease;
+    HUD_SOUND sndShow, sndHide, sndBtnPress, sndBtnRelease, sndItemOn;
+    bool HeadLampSwitch{}, NightVisionSwitch{};
 
     bool this_is_3d_pda{};
 
@@ -76,6 +77,11 @@ public:
     bool Is3DPDA() const { return this_is_3d_pda; }
     virtual void OnStateSwitch(u32 S, u32 oldState) override;
     virtual void OnAnimationEnd(u32 state) override;
+
+    // анимация включения/выключения фонаря и ПНВ (anm_headlamp_on), как у CMissile/CWeaponKnife
+    virtual bool Action(s32 cmd, u32 flags) override;
+    virtual void DeviceUpdate() override;
+    virtual void PlayAnimDeviceSwitch() override;
 
     virtual void PlayAnimIdle() override;
     bool ThumbAnimsAllowed() const { return joystick == BI_NONE; }

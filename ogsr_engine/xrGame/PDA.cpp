@@ -8,6 +8,9 @@
 #include "xrserver.h"
 #include "xrServer_Objects_ALife_Items.h"
 #include "level.h"
+#include "torch.h"
+#include "inventory.h"
+#include "xr_level_controller.h"
 
 #include "specific_character.h"
 #include "alife_registry_wrappers.h"
@@ -18,7 +21,7 @@
 #include "inventory.h"
 #include "game_object_space.h"
 #include "script_game_object.h"
-
+#include "../xr_3da/x_ray.h"
 static CUIPdaWnd* GetPdaWindow()
 {
     if (auto pGameSP = smart_cast<CUIGameSP*>(HUD().GetUI()->UIGame()))
@@ -75,6 +78,11 @@ void CPda::Load(LPCSTR section)
     m_joystick_bone = READ_IF_EXISTS(pSettings, r_string, section, "joystick_bone", nullptr);
     HUD_SOUND::LoadSound(section, "snd_draw", sndShow, SOUND_TYPE_ITEM_TAKING);
     HUD_SOUND::LoadSound(section, "snd_holster", sndHide, SOUND_TYPE_ITEM_HIDING);
+    // snd_item_on можно задать как в секции предмета (device_pda), так и в худовой секции (pda_hud)
+    if (pSettings->line_exist(section, "snd_item_on"))
+        HUD_SOUND::LoadSound(section, "snd_item_on", sndItemOn, SOUND_TYPE_WEAPON_EMPTY_CLICKING);
+    else if (hud_sect.size() && pSettings->line_exist(hud_sect, "snd_item_on"))
+        HUD_SOUND::LoadSound(hud_sect.c_str(), "snd_item_on", sndItemOn, SOUND_TYPE_WEAPON_EMPTY_CLICKING);
 
     m_screen_on_delay = READ_IF_EXISTS(pSettings, r_float, section, "screen_on_delay", 0.f);
     m_screen_off_delay = READ_IF_EXISTS(pSettings, r_float, section, "screen_off_delay", 0.f);
@@ -364,6 +372,11 @@ void CPda::OnStateSwitch(u32 S, u32 oldState)
         SetPending(FALSE);
     }
     break;
+    case eDeviceSwitch: {
+        SetPending(TRUE);
+        PlayAnimDeviceSwitch();
+    }
+    break;
     case eIdle: {
         PlayAnimIdle();
 
@@ -399,7 +412,90 @@ void CPda::OnAnimationEnd(u32 state)
         g_player_hud->detach_item(this);
     }
     break;
+    case eDeviceSwitch: {
+        // Если lock_time_end_anm_headlamp_on в худовой секции не задан (или анимация закончилась раньше),
+        // переключаем сейчас. Если уже переключено в нужный момент - флаги сброшены и ничего не произойдёт
+        DeviceUpdate();
+        SetPending(FALSE);
+        SwitchState(eIdle);
+    }
+    break;
     default: inherited::OnAnimationEnd(state);
+    }
+}
+
+bool CPda::Action(s32 cmd, u32 flags)
+{
+    if (inherited::Action(cmd, flags))
+        return true;
+
+    if (!this_is_3d_pda)
+        return false;
+
+    auto pActor = smart_cast<CActor*>(H_Parent());
+    if (!pActor)
+        return false;
+
+    switch (cmd)
+    {
+    case kTORCH: {
+        auto pActorTorch = pActor->inventory().ItemFromSlot(TORCH_SLOT);
+        if ((flags & CMD_START) && pActorTorch && GetState() == eIdle)
+        {
+            NightVisionSwitch = false;
+            HeadLampSwitch = true;
+            SwitchState(eDeviceSwitch);
+        }
+        return true;
+    }
+    break;
+    case kNIGHT_VISION: {
+        auto pActorNv = pActor->inventory().ItemFromSlot(IS_OGSR_GA ? NIGHT_VISION_SLOT : TORCH_SLOT);
+        if ((flags & CMD_START) && pActorNv && GetState() == eIdle)
+        {
+            HeadLampSwitch = false;
+            NightVisionSwitch = true;
+            SwitchState(eDeviceSwitch);
+        }
+        return true;
+    }
+    break;
+    }
+    return false;
+}
+
+void CPda::DeviceUpdate()
+{
+    auto pA = smart_cast<CActor*>(H_Parent());
+    if (!pA)
+        return;
+
+    if (HeadLampSwitch)
+    {
+        if (auto pActorTorch = smart_cast<CTorch*>(pA->inventory().ItemFromSlot(TORCH_SLOT)))
+            pActorTorch->Switch();
+        HeadLampSwitch = false;
+    }
+    else if (NightVisionSwitch)
+    {
+        if (auto pActorTorch = smart_cast<CTorch*>(pA->inventory().ItemFromSlot(TORCH_SLOT)))
+            pActorTorch->SwitchNightVision();
+        NightVisionSwitch = false;
+    }
+}
+
+void CPda::PlayAnimDeviceSwitch()
+{
+    PlaySound(sndItemOn, Position());
+
+    if (AnimationExist("anm_headlamp_on"))
+        PlayHUDMotion("anm_headlamp_on", true, GetState());
+    else
+    {
+        // анимации в худе нет - переключаем сразу, как раньше
+        DeviceUpdate();
+        SetPending(FALSE);
+        SwitchState(eIdle);
     }
 }
 
@@ -612,4 +708,5 @@ CPda::~CPda()
     HUD_SOUND::DestroySound(sndHide);
     HUD_SOUND::DestroySound(sndBtnPress);
     HUD_SOUND::DestroySound(sndBtnRelease);
+    HUD_SOUND::DestroySound(sndItemOn);
 }

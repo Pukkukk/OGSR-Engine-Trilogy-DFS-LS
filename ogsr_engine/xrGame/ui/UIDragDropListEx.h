@@ -13,7 +13,8 @@ enum EListType
 {
     iwSlot,
     iwBag,
-    iwBelt
+    iwBelt,
+    iwFastSlot
 };
 
 struct CUICell

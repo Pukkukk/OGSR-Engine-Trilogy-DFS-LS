@@ -203,6 +203,18 @@ void CUIInventoryWnd::Init()
         m_slots_array[TORCH_SLOT] = m_pUITorchList;
     }
 
+    for (int i = 0; i < FAST_SLOTS; ++i)
+    {
+        string32 node;
+        xr_sprintf(node, "dragdrop_fast_slot_%d", i + 1);
+        if (!uiXml.NavigateToNode(node, 0))
+            continue;
+        m_pUIFastSlotList[i] = xr_new<CUIDragDropListEx>();
+        AttachChild(m_pUIFastSlotList[i]);
+        m_pUIFastSlotList[i]->SetAutoDelete(true);
+        xml_init.InitDragDropListEx(uiXml, node, 0, m_pUIFastSlotList[i]);
+    }
+
     // pop-up menu
     AttachChild(&UIPropertiesBox);
     UIPropertiesBox.Init(0, 0, 300, 300);
@@ -241,12 +253,23 @@ void CUIInventoryWnd::Init()
     }
 }
 
+int CUIInventoryWnd::GetFastSlotIdx(CUIDragDropListEx* l)
+{
+    if (l)
+        for (int i = 0; i < FAST_SLOTS; ++i)
+            if (m_pUIFastSlotList[i] == l)
+                return i;
+    return -1;
+}
+
 EListType CUIInventoryWnd::GetType(CUIDragDropListEx* l)
 {
     if (l == m_pUIBagList)
         return iwBag;
     if (l == m_pUIBeltList)
         return iwBelt;
+    if (GetFastSlotIdx(l) >= 0)
+        return iwFastSlot; // новое
 
     for (u8 i = 0; i < SLOTS_TOTAL; i++)
         if (m_slots_array[i] == l)

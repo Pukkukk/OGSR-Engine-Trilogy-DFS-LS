@@ -392,6 +392,14 @@ bool CUIInventoryWnd::OnItemDrop(CUICellItem* itm)
     if (old_owner == new_owner || !old_owner || !new_owner)
         return false;
 
+    const int fast_idx = GetFastSlotIdx(new_owner);
+    if (fast_idx >= 0)
+    {
+        if (auto item = (PIItem)itm->m_pData)
+            g_actor->callback(GameObject::eOnFastSlotDrop)(item->object().lua_game_object(), fast_idx + 1);
+        return true; // предмет остаётся в исходном списке, ничего не перемещаем
+    }
+
     auto t_new = GetType(new_owner);
     auto t_old = GetType(old_owner);
 

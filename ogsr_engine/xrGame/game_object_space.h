@@ -107,7 +107,7 @@ enum ECallbackType
     eOnActorLand,
     eOnActorJump,
     eOnActorBoltThrow,
-
+    eOnFastSlotDrop,
     eDummy = u32(-1),
 };
 };

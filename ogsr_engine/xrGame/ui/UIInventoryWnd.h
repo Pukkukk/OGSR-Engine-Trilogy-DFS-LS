@@ -179,4 +179,9 @@ public:
     PIItem CurrentIItem();
     void UpdateWeight();
     void UpdateOutfit();
+
+protected:
+    static constexpr int FAST_SLOTS = 4;
+    CUIDragDropListEx* m_pUIFastSlotList[FAST_SLOTS]{};
+    int GetFastSlotIdx(CUIDragDropListEx* l);
 };

@@ -58,8 +58,10 @@ public:
     CUICharacterInfo();
     virtual ~CUICharacterInfo();
 
-    void Init(float x, float y, float width, float height, CUIXml* xml_doc);
-    void Init(float x, float y, float width, float height, const char* xml_name);
+    // root_node - имя блока в xml с раскладкой конкретного персонажа (например, "actor" / "partner").
+    // nullptr или отсутствующий в файле блок - раскладка берётся из корня файла, как раньше
+    void Init(float x, float y, float width, float height, CUIXml* xml_doc, const char* root_node = nullptr);
+    void Init(float x, float y, float width, float height, const char* xml_name, const char* root_node = nullptr);
     void InitCharacter(u16 id);
     void ClearInfo();
 

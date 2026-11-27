@@ -79,12 +79,12 @@ void CUICarBodyWnd::Init()
     m_pUICharacterInfoLeft = xr_new<CUICharacterInfo>();
     m_pUICharacterInfoLeft->SetAutoDelete(true);
     m_pUIOurIcon->AttachChild(m_pUICharacterInfoLeft);
-    m_pUICharacterInfoLeft->Init(0, 0, m_pUIOurIcon->GetWidth(), m_pUIOurIcon->GetHeight(), "trade_character.xml");
+    m_pUICharacterInfoLeft->Init(0, 0, m_pUIOurIcon->GetWidth(), m_pUIOurIcon->GetHeight(), "trade_character.xml", "actor");
 
     m_pUICharacterInfoRight = xr_new<CUICharacterInfo>();
     m_pUICharacterInfoRight->SetAutoDelete(true);
     m_pUIOthersIcon->AttachChild(m_pUICharacterInfoRight);
-    m_pUICharacterInfoRight->Init(0, 0, m_pUIOthersIcon->GetWidth(), m_pUIOthersIcon->GetHeight(), "trade_character.xml");
+    m_pUICharacterInfoRight->Init(0, 0, m_pUIOthersIcon->GetWidth(), m_pUIOthersIcon->GetHeight(), "trade_character.xml", "partner");
 
     m_pUIOurBagWnd = xr_new<CUIStatic>();
     m_pUIOurBagWnd->SetAutoDelete(true);

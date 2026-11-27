@@ -42,9 +42,9 @@ void CUITalkDialogWnd::Init(float x, float y, float width, float height)
     AttachChild(&UIOthersIcon);
     CUIXmlInit::InitStatic(*m_uiXml, "right_character_icon", 0, &UIOthersIcon);
     UIOurIcon.AttachChild(&UICharacterInfoLeft);
-    UICharacterInfoLeft.Init(0.0f, 0.0f, UIOurIcon.GetWidth(), UIOurIcon.GetHeight(), TRADE_CHARACTER_XML);
+    UICharacterInfoLeft.Init(0.0f, 0.0f, UIOurIcon.GetWidth(), UIOurIcon.GetHeight(), TRADE_CHARACTER_XML, "actor");
     UIOthersIcon.AttachChild(&UICharacterInfoRight);
-    UICharacterInfoRight.Init(0.0f, 0.0f, UIOthersIcon.GetWidth(), UIOthersIcon.GetHeight(), TRADE_CHARACTER_XML);
+    UICharacterInfoRight.Init(0.0f, 0.0f, UIOthersIcon.GetWidth(), UIOthersIcon.GetHeight(), TRADE_CHARACTER_XML, "partner");
 
     //основной фрейм диалога
     AttachChild(&UIDialogFrame);

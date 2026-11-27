@@ -115,9 +115,9 @@ void CUITradeWnd::Init()
     AttachChild(&m_uidata->UIOthersIcon);
     xml_init.InitStatic(uiXml, "static_icon", 1, &m_uidata->UIOthersIcon);
     m_uidata->UIOurIcon.AttachChild(&m_uidata->UICharacterInfoLeft);
-    m_uidata->UICharacterInfoLeft.Init(0, 0, m_uidata->UIOurIcon.GetWidth(), m_uidata->UIOurIcon.GetHeight(), TRADE_CHARACTER_XML);
+    m_uidata->UICharacterInfoLeft.Init(0, 0, m_uidata->UIOurIcon.GetWidth(), m_uidata->UIOurIcon.GetHeight(), TRADE_CHARACTER_XML, "actor");
     m_uidata->UIOthersIcon.AttachChild(&m_uidata->UICharacterInfoRight);
-    m_uidata->UICharacterInfoRight.Init(0, 0, m_uidata->UIOthersIcon.GetWidth(), m_uidata->UIOthersIcon.GetHeight(), TRADE_CHARACTER_XML);
+    m_uidata->UICharacterInfoRight.Init(0, 0, m_uidata->UIOthersIcon.GetWidth(), m_uidata->UIOthersIcon.GetHeight(), TRADE_CHARACTER_XML, "partner");
 
     //Списки торговли
     AttachChild(&m_uidata->UIOurBagWnd);

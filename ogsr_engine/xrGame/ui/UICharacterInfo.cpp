@@ -43,9 +43,18 @@ CUICharacterInfo::CUICharacterInfo() : m_ownerID(u16(-1)), pUIBio(NULL)
 
 CUICharacterInfo::~CUICharacterInfo() {}
 
-void CUICharacterInfo::Init(float x, float y, float width, float height, CUIXml* xml_doc)
+void CUICharacterInfo::Init(float x, float y, float width, float height, CUIXml* xml_doc, const char* root_node)
 {
     inherited::Init(x, y, width, height);
+
+    // Все узлы ниже ищутся относительно локального корня. Если задан root_node и такой блок есть в xml -
+    // берём раскладку из него, иначе из корня файла (старый формат, общая раскладка).
+    XML_NODE* stored_root = xml_doc->GetLocalRoot();
+    if (root_node && *root_node)
+    {
+        if (XML_NODE* layout = xml_doc->NavigateToNode(root_node, 0))
+            xml_doc->SetLocalRoot(layout);
+    }
 
     CUIXmlInit xml_init;
     CUIStatic* pItem = NULL;
@@ -153,14 +162,16 @@ void CUICharacterInfo::Init(float x, float y, float width, float height, CUIXml*
         xml_init.InitScrollView(*xml_doc, "biography_list", 0, pUIBio);
         AttachChild(pUIBio);
     }
+
+    xml_doc->SetLocalRoot(stored_root);
 }
 
-void CUICharacterInfo::Init(float x, float y, float width, float height, const char* xml_name)
+void CUICharacterInfo::Init(float x, float y, float width, float height, const char* xml_name, const char* root_node)
 {
     CUIXml uiXml;
     bool xml_result = uiXml.Init(CONFIG_PATH, UI_PATH, xml_name);
     R_ASSERT3(xml_result, "xml file not found", xml_name);
-    Init(x, y, width, height, &uiXml);
+    Init(x, y, width, height, &uiXml, root_node);
 }
 
 void CUICharacterInfo::InitCharacter(u16 id)
